@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sherpa-logistics // Tacitcal Alpine Ascent</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <h1>Sherpa-logistics</h1>
+            <span class="subtitle">PEAK 01: FROSTBITE RIDGE</span>
+        </div>
+        <div class="header-controls">
+            <span id="turn-display">TURN: <strong>01</strong></span>
+            <button id="btn-restart" class="btn-secondary">RESTART [R]</button>
+        </div>
+    </header>
+    <main>
+        <section class="grid-panel">
+            <div id="mountain-grid" class="mountain-grid"></div>
+        </section>
+        <aside class="hud-panel">
+            <div class="hud-card">
+                <h2>EXPEDITION VITALS</h2>
+                <div class="stat-row">
+                    <span>RATIONS (STAMINA)</span>
+                    <strong id="stat-rations">12</strong>
+                </div>
+                <div class="stat-row">
+                    <span>OXYGEN TANKS</span>
+                    <strong id="stat-oxygen">10</strong>
+                </div>
+                <div class="stat-row">
+                    <span>CLIMBING PITONS</span>
+                    <strong id="stat-pitons">3</strong>
+                </div>
+                <div class="stat-row">
+                    <span>ELEVATION</span>
+                    <strong id="stat-elevation">4,200m</strong>
+                </div>
+            </div>
+            <div class="hud-card">
+                <h2>ACTIONS</h2>
+                <button id="btn-tent" class="btn-primary">PITCH TENT (WAIT/ + 2 02)</button>
+                <p class="hint-text">Use WASD / Arrow Keys or click adjacent tiles to move.</p>
+            </div>
+            <div class="hud-card">
+                <h2>TERRAIN KEY</h2>
+                <ul class="legend-list">
+                    <li><span class="swatch tile-snow"></span> Snow Field (1 Ration)</li>
+                    <li><span class="swatch tile-ridge"></span> Steep Ridge (2 Rations)</li>
+                    <li><span class="swatch tile-ice"></span> Ice Wall (1 Ration + 1 Pition)</li>
+                    <li><span class="swatch tile-cache"></span> Supply Cache (+Supplies)</li>
+                    <li><span class="swatch tile-summit"></span> The Peak (Goal)</li>
+                </ul>
+            </div>
+        </aside>
+    </main>
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h2 id="modal-title">EXPEDITION STATUS</h2>
+            <p id="modal-message">Message goes here.</p>
+            <button id="btn-modal-restart" class="btn-primary">NEW EXPEDITION</button>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
