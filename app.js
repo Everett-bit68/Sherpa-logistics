@@ -117,7 +117,7 @@ function checkEndConditions(){
     }
     if (state.oxygen <=0){
         state.gameOver = true;
-        showModal("HYDRXIA CRITICAL", "Your oxygen reserves ran dry before reaching the peak.");
+        showModal("HYPOXIA CRITICAL", "Your oxygen reserves ran dry before reaching the peak.");
         return;
     }
     if (state.rations <= 0){
