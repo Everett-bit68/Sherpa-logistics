@@ -23,6 +23,7 @@ const logEl = document.getElementById("radio-log");
 const modalOverlay = document.getElementById("modal-overlay");
 const modalTitle = document.getElementById("modal-title");
 const modalMessage = document.getElementById("modal-message");
+const weatherEl = document.getElementById("weather-display");
 function initGame(){
     state = {
         grid: PEAK_01_MAP.map(row => [...row]),
@@ -31,6 +32,7 @@ function initGame(){
         rations : 12,
         oxygen : 10,
         pitons : 3,
+        blizzardRows: [2,6],
         gameOver : false
     };
     logEl.innerHTML = "";
@@ -89,6 +91,9 @@ function attemptMove(targetX, targetY){
     } else if (tile === 1){
         addLog("Traversed steep ridge (-2 Rations).");
     }
+    if (state.grid[targetY][targetX] !== 9){
+        advanceBlizzards(false);
+    }
     checkEndConditions();
     render();
 }
@@ -102,6 +107,7 @@ function pitchTent(){
     state.oxygen +=2;
     state.turn +=1;
     addLog("Pitched tent. Recovered +2 Oxygen (-1 Ration)");
+    advanceBlizzards(true);
     checkEndConditions();
     render();
 }
@@ -138,6 +144,19 @@ function render(){
     const progress = (ROWS - 1 - state.player.y)/(ROWS - 1);
     const elevation = Math.round(4200 + progress * 4648);
     elevationEl.textContent = `${elevation.toLocaleString()}m`;
+    const forecastRows = state.blizzardRows.map(getNextRow);
+    const playerInStorm = state.blizzardRows.includes(state.player.y);
+    const playerInForecast = forecastRows.includes(state.player.y);
+    if (playerInStorm){
+        weatherEl.textContent = "WEATHER: WHITEOUT";
+        weatherEl.classList.add("storm-alert");
+    } else if (playerInForecast){
+        weatherEl.textContent = "WEATHER: STORM INCOMING";
+        weatherEl.classList.add("storm-alert");
+    } else {
+        weatherEl.textContent = "WEATHER: CLEAR";
+        weatherEl.classList.remove("storm-alert");
+    }
     gridEl.innerHTML = "";
     for (let y =0; y<ROWS; y++){
         for (let x = 0; x<COLS;x++){
@@ -162,6 +181,11 @@ function render(){
             } else if (tileVal === 9){
                 cell.classList.add("tile-summit");
                 cell.textContent = "PEAK";
+            }
+            if(state.blizzardRows.includes(y) && tileVal !== 3 && tileVal !== 9){
+                cell.classList.add("blizzard");
+            } else if (forecastRows.includes(y) && tileVal !== 3 && tileVal !==9){
+                cell.classList.add("forecast");
             }
             if (isAdjacent(x,y) && tileVal !==3 && !state.gameOver){
                 cell.classList.add("adjacent");
@@ -188,5 +212,19 @@ document.addEventListener("keydown",(e)=>{
 document.getElementById("btn-tent").addEventListener("click",pitchTent);
 document.getElementById("btn-restart").addEventListener("click", initGame);
 document.getElementById("btn-modal-restart").addEventListener("click", initGame);
-
+function getNextRow(row){
+    return row >= ROWS - 2?1:row+1;
+}
+function advanceBlizzards(isSheltered){
+    state.blizzardRows = state.blizzardRows.map(getNextRow);
+    const inStorm = state.blizzardRows.includes(state.player.y);
+    if (inStorm){
+        if(isSheltered){
+            addLog("Blizzard roared overhead, but your tent held firm!(0 Storm Damage)");
+        } else {
+            state.oxygen -=1;
+            addLog("CAUGHT IN WHITEOUT! Freezing winds drained -1 Oxygen");
+        }
+    }
+}
 initGame();
