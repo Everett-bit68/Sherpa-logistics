@@ -99,7 +99,7 @@ function attemptMove(targetX, targetY){
 }
 function pitchTent(){
     if (state.gameOver) return;
-    if (state.rations < 1){
+    if (state.rations <= 1){
         addLog("Not enough rations to make camp.");
         return;
     }
