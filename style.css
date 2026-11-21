@@ -163,3 +163,9 @@ select.btn-secondary{
     font-family: inherit; font-weight: bold; padding: 0.55rem 0.75rem; border-radius: 4px; background-color: var(--bg-dark);
     cursor: pointer;
 }
+select.btn-secondary option{
+    background-color: var(--bg-panel); color: var(--text-main);
+}
+select.btn-secondary:hover,select.btn-secondary:focus{
+    border-color: var(--accent-cyan); outline: none;
+}
