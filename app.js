@@ -6,8 +6,11 @@ const PEAKS = [
         summitElevation: 8848,
         startPos: {x : 3, y : 8},
         rations: 12,
+        maxRations: 14,
         oxygen: 10,
+        maxOxygen: 12,
         pitons: 3,
+        maxPitons: 4,
         blizzardRows: [2,6],
         map: [
             [3, 3, 3, 9, 3, 3, 3],
@@ -29,8 +32,11 @@ const PEAKS = [
         summitElevation: 8611,
         startPos: {x:3,y:9},
         rations: 11,
+        maxRations: 12,
         oxygen: 9,
+        maxOxygen: 10,
         pitons: 2,
+        maxPitons: 3,
         blizzardRows: [1,4,7],
         map:[
             [3, 3, 3, 9, 3, 3, 3],
@@ -181,8 +187,11 @@ function initGame(peakIndex = currentPeakIndex){
         player: {...peak.startPos},
         turn: 1,
         rations: peak.rations,
+        maxRations: peak.maxRations,
         oxygen: peak.oxygen,
+        maxOxygen: peak.maxOxygen,
         pitons: peak.pitons,
+        maxPitons: peak.maxPitons,
         blizzardRows: [...peak.blizzardRows],
         gameOver: false
     };
@@ -245,11 +254,17 @@ function attemptMove(targetX, targetY){
     state.turn +=1;
     if (tile === 4){
         SoundFX.cache();
-        state.rations += 4;
-        state.oxygen +=3;
-        state.pitons +=1;
+        const prevRations = state.rations;
+        const prevOxygen = state.oxygen;
+        const prevPitons = state.pitons;
+        state.rations = Math.min(state.maxRations, state.rations+4);
+        state.oxygen = Math.min(state.maxOxygen, state.oxygen +3);
+        state.pitons = Math.min(state.maxPitons, state.pitons+1);
         state.grid[targetY][targetX] = 0;
-        addLog("Supply cache recovered! (+4 Rations, +3 O2, +1 Piton)");
+        const gainRations = state.rations - prevRations;
+        const gainOxygen = state.oxygen - prevOxygen;
+        const gainPitons = state.pitons - prevPitons;
+        addLog(`Supply cache recovered! (+${gainRations} Rations, +${gainOxygen} O2, +${gainPitons} Piton)`);
     } else if (tile === 2){
         SoundFX.icePiton();
         addLog("Anchored piton and scaled ice wall.");
@@ -272,10 +287,17 @@ function pitchTent(){
         addLog("Not enough rations to make camp.");
         return;
     }
+    if (state.oxygen >= state.maxOxygen){
+        SoundFX.blocked();
+        addLog("Oxygen reserves already at max capacity");
+        return;
+    }
+    const prevOxygen = state.oxygen;
     state.rations -=1;
-    state.oxygen +=2;
+    state.oxygen = Math.min(state.maxOxygen,state.oxygen+2);
     state.turn +=1;
-    addLog("Pitched tent. Recovered +2 Oxygen (-1 Ration)");
+    const gainedOxygen = state.oxygen - prevOxygen;
+    addLog(`Pitched tent. Recovered +${gainedOxygen} Oxygen (-1 Ration)`);
     SoundFX.tent();
     advanceBlizzards(true);
     checkEndConditions();
@@ -316,9 +338,9 @@ function showModal(title,message){
 }
 function render(){
     turnEl.innerHTML = `TURN: <strong>${String(state.turn).padStart(2,"0")}</strong>`;
-    rationsEl.textContent = state.rations;
-    oxygenEl.textContent = state.oxygen;
-    pitonsEl.textContent = state.pitons;
+    rationsEl.textContent = `${state.rations} / ${state.maxRations}`;
+    oxygenEl.textContent = `${state.oxygen} / ${state.maxOxygen}`;
+    pitonsEl.textContent = `${state.pitons} / ${state.maxPitons}`;
     const peak = PEAKS[currentPeakIndex];
     const progress = (state.rows - 1-state.player.y)/(state.rows-1);
     const elevation =Math.round(peak.baseElevation+progress*(peak.summitElevation-peak.baseElevation));
