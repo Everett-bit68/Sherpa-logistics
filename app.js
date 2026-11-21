@@ -79,7 +79,7 @@ const SoundFX = (()=>{
         if (muted) return;
         const audioCtx = getContext();
         const now = audioCtx.currentTime + delay;
-        const osc = audioCtx.CreateOscillator();
+        const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = type;
         osc.frequency.setValueAtTime(freq, now);
@@ -145,7 +145,7 @@ const SoundFX = (()=>{
         },
         cache(){
             playTone(523,0.1,"triangle",0.11,null,0);
-            playTone(659,25,0.1,"triangle",0.11,null,0.08);
+            playTone(659.25,0.1,"triangle",0.11,null,0.08);
             playTone(784,0.18,"triangle",0.12,null,0.16);
         },
         tent(){
@@ -229,10 +229,12 @@ function attemptMove(targetX, targetY){
     }
     if (state.rations < rationCost){
         addLog("Insufficient rations for that climb!");
+        SoundFX.blocked();
         return;
     }
     if (state.pitons < pitonCost){
         addLog("Need a climbing piton to scale that ice wall!");
+        SoundFX.blocked();
         return;
     }
     state.player.x = targetX;
