@@ -13,6 +13,10 @@
             <span class="subtitle">PEAK 01: FROSTBITE RIDGE</span>
         </div>
         <div class="header-controls">
+            <select id="peak-select" class="btn-secondary">
+                <option value="0">PEAK 01: FROSTBITE RIDGE</option>
+                <option value="1">PEAK 02: SERAC WALL</option>
+            </select>
             <span id="weather-display" class="weather-badge">WEATHER: CLEAR</span>
             <span id="turn-display">TURN: <strong>01</strong></span>
             <button id="btn-restart" class="btn-secondary">RESTART [R]</button>
@@ -67,6 +71,10 @@
     </main>
     <div id="modal-overlay" class="modal-overlay hidden">
         <div class="modal-box">
+            <div class="modal-actions">
+                <button id="btn-next-peak" class="btn-primary hidden">NEXT PEAK</button>
+                <button id="btn-modal-restart" class="btn-secondary">RETRY EXPEDITION</button>
+            </div>
             <h2 id="modal-title">EXPEDITION STATUS</h2>
             <p id="modal-message">Message goes here.</p>
             <button id="btn-modal-restart" class="btn-primary">NEW EXPEDITION</button>

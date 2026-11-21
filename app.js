@@ -1,15 +1,42 @@
-const PEAK_01_MAP = [
-    [3, 3, 3, 9, 3, 3, 3],
-    [3, 0, 2, 1, 2, 0, 3],
-    [0, 1, 3, 2, 3, 1, 4],
-    [0, 2, 1, 0, 1, 2, 0],
-    [0, 2, 1, 0, 1, 2, 0],
-    [4, 0, 3, 1, 3, 0, 0],
-    [1, 1, 0, 2, 0, 1, 1],
-    [0, 3, 1, 0, 1, 3, 0],
-    [0, 0, 0, 1, 0, 0, 0],
-    [3, 3, 0, 0, 0, 3, 3]
+const PEAKS = [
+    {
+        id: "PEAK_01",
+        name: "FROSTBITE RIDGE",
+        baseElevation: 4200,
+        summitElevation: 8848,
+        startPos: {x : 3, y : 8},
+        rations: 12,
+        pitons: 3,
+        blizzardRows: [2,6],
+        map: [
+            [3, 3, 3, 9, 3, 3, 3],
+            [3, 0, 2, 1, 2, 0, 3],
+            [0, 1, 3, 2, 3, 1, 4],
+            [0, 2, 1, 0, 1, 2, 0],
+            [0, 2, 1, 0, 1, 2, 0],
+            [4, 0, 3, 1, 3, 0, 0],
+            [1, 1, 0, 2, 0, 1, 1],
+            [0, 3, 1, 0, 1, 3, 0],
+            [0, 0, 0, 1, 0, 0, 0],
+            [3, 3, 0, 0, 0, 3, 3]
+        ]
+    },
+    {
+        id: "PEAK 02",
+        name: "SERAC WALL",
+        baseElevation: 5100,
+        summitElevation: 8611,
+        startPos: {x:3,y:9},
+        rations: 11,
+        oxygen: 9,
+        pitons: 2,
+        blizzardRows: [1,4,7],
+        map:[
+
+        ]
+    }
 ];
+let currentPeakIndex = 0;
 const ROWS = PEAK_01_MAP.length;
 const COLS = PEAK_01_MAP[0].length;
 let state = {};
@@ -24,20 +51,32 @@ const modalOverlay = document.getElementById("modal-overlay");
 const modalTitle = document.getElementById("modal-title");
 const modalMessage = document.getElementById("modal-message");
 const weatherEl = document.getElementById("weather-display");
-function initGame(){
+const subtitleEl =document.querySelector(".brand .subtitle");
+const nextPeakBtn = document.getElementById("btn-next-peak");
+function initGame(peakIndex = currentPeakIndex){
+    currentPeakIndex = peakIndex;
+    const peak = PEAKS[currentPeakIndex];
     state = {
-        grid: PEAK_01_MAP.map(row => [...row]),
-        player: {x:3, y:8},
-        turn : 1,
-        rations : 12,
-        oxygen : 10,
-        pitons : 3,
-        blizzardRows: [2,6],
-        gameOver : false
+        grid: peak.map.map(row => [...row]),
+        rows: peak.map.length,
+        cols: peak.map[0].length,
+        player: {...peak.startPos},
+        turn: 1,
+        rations: peak.rations,
+        oxygen: peak.oxygen,
+        pitons: peak.pitons,
+        blizzardRows: [...peak.blizzardRows],
+        gameOver: false
     };
+    if (subtitleEl){
+        subtitleEl.textContent = `${peak.id}: ${peak.name}`;
+    }
+    if (nextPeakBtn){
+        nextPeakBtn.classList.add("hidden");
+    }
     logEl.innerHTML = "";
     modalOverlay.classList.add("hidden");
-    addLog("Basecamp departed. Plan your route to the summit.");
+    addLog(`${peak.id} (${peak.name}) basecamp departed. Plan your route.`);    
     render();
 }
 function addLog(msg){
@@ -52,7 +91,7 @@ function isAdjacent(x,y){
 }
 function attemptMove(targetX, targetY){
     if (state.gameOver) return;
-    if (targetX < 0 || targetX >= COLS || targetY < 0 || targetY >=ROWS) return;
+    if (targetX < 0 || targetX >= state.cols|| targetY < 0 || targetY >=state.rows) return;
     if (!isAdjacent(targetX,targetY))return;
     const tile = state.grid[targetY][targetX];
     if (tile === 3){
@@ -115,9 +154,14 @@ function checkEndConditions(){
     const currentTile = state.grid[state.player.y][state.player.x];
     if (currentTile === 9){
         state.gameOver = true;
+        const peak = PEAKS[currentPeakIndex];
+        const hasNextPeak = currentPeakIndex<PEAKS.length-1;
+        if (nextPeakBtn){
+            nextPeakBtn.classList.toggle("hidden",!hasNextPeak);
+        }
         showModal(
             "SUMMIT REACHED!",
-            `You conquered Frostbite Ridge in ${state.turn - 1} turns with ${state.rations} rations and ${state.oxygen} oxygen remaining.`
+            `You conquered ${peak.name} in ${state.turn - 1} turns with ${state.rations} rations and ${state.oxygen} oxygen remaining.`
         );
         return;
     }
@@ -141,8 +185,9 @@ function render(){
     rationsEl.textContent = state.rations;
     oxygenEl.textContent = state.oxygen;
     pitonsEl.textContent = state.pitons;
-    const progress = (ROWS - 1 - state.player.y)/(ROWS - 1);
-    const elevation = Math.round(4200 + progress * 4648);
+    const peak = PEAKS[currentPeakIndex];
+    const progress = (state.rows - 1-state.player.y)/(state.rows-1);
+    const elevation =Math.round(peak.baseElevation+progress*(peak.summitElevation-peak.baseElevation));
     elevationEl.textContent = `${elevation.toLocaleString()}m`;
     const forecastRows = state.blizzardRows.map(getNextRow);
     const playerInStorm = state.blizzardRows.includes(state.player.y);
@@ -158,8 +203,8 @@ function render(){
         weatherEl.classList.remove("storm-alert");
     }
     gridEl.innerHTML = "";
-    for (let y =0; y<ROWS; y++){
-        for (let x = 0; x<COLS;x++){
+    for (let y =0; y<state.rows; y++){
+        for (let x = 0; x<state.cols;x++){
             const tileVal = state.grid[y][x];
             const cell = document.createElement("div");
             cell.classList.add("tile");
@@ -209,11 +254,23 @@ document.addEventListener("keydown",(e)=>{
     if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") attemptMove(x - 1,y);
     if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") attemptMove(x + 1,y);
 });
+if (peakSelectEl){
+    peakSelectEl.addEventListener("change",(e)=>{
+        initGame(Number(e.target.value));
+    });
+}
+if (nextPeakBtn){
+    nextPeakBtn.addEventListener("click",()=>{
+        const nextIndex = (currentPeakIndex + 1) % PEAKS.length;
+        if (peakSelectEl) peakSelectEl.value = String(nextIndex);
+        initGame(nextIndex);
+    });
+}
 document.getElementById("btn-tent").addEventListener("click",pitchTent);
 document.getElementById("btn-restart").addEventListener("click", initGame);
 document.getElementById("btn-modal-restart").addEventListener("click", initGame);
 function getNextRow(row){
-    return row >= ROWS - 2?1:row+1;
+    return row >= state.rows - 2?1:row+1;
 }
 function advanceBlizzards(isSheltered){
     state.blizzardRows = state.blizzardRows.map(getNextRow);
