@@ -62,6 +62,115 @@ const weatherEl = document.getElementById("weather-display");
 const subtitleEl =document.querySelector(".brand .subtitle");
 const nextPeakBtn = document.getElementById("btn-next-peak");
 const peakSelectEl = document.getElementById("peak-select");
+const SoundFX = (()=>{
+    let ctx = null;
+    let muted = false;
+    function getContext(){
+        if (!ctx){
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            ctx = new AudioCtx();
+        }
+        if (ctx.state === "suspended"){
+            ctx.resume();
+        }
+        return ctx;
+    }
+    function playTone(freq, duration, type="sine", volume = 0.12, endFreq = null, delay = 0){
+        if (muted) return;
+        const audioCtx = getContext();
+        const now = audioCtx.currentTime + delay;
+        const osc = audioCtx.CreateOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+        if (endFreq){
+            osc.frequency.exponentialRampToValueAtTime(endFreq, now + duration);
+        }
+        gain.gain.setValueAtTime(0.001,now);
+        gain.gain.linearRampToValueAtTime(volume, now + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.001,now+duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now+duration+0.02);
+    }
+    function playNoise(duration, filterFreq = 800, volume = 0.08){
+        if (muted) return;
+        const audioCtx = getContext();
+        const now = audioCtx.currentTime;
+        const bufferSize = Math.floor(audioCtx.sampleRate * duration);
+        const buffer = audioCtx.createBuffer(1,bufferSize,audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i=0; i<bufferSize;i++){
+            data[i] = Math.random()*2-1;
+        }
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = "bandpass";
+        filter.frequency.setValueAtTime(filterFreq,now);
+        filter.Q.setValueAtTime(2.5,now);
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.001,now);
+        gain.gain.linearRampToValueAtTime(volume,now + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001,now+duration);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        noise.start(now);
+        noise.stop(now+duration+0.02);
+    }
+    return{
+        toggleMute(){
+            muted = !muted;
+            return muted;
+        },
+        isMuted(){
+            return muted;
+        },
+        stepSnow(){
+            playNoise(0.09,1100,0.06);
+            playTone(190,0.07,"triangle",0.08,130);
+        },
+        stepRidge(){
+            playNoise(0.14,700,0.09);
+            playTone(150,0.12,"sawtooth",0.07,95);
+        },
+        icePiton(){
+            playTone(980, 0.08, "square",0.09,620);
+            playTone(1420,0.14,"triangle",0.08,880,0.05);
+        },
+        blocked(){
+            playTone(130,0.12,"sawtooth",0.09,85);
+        },
+        cache(){
+            playTone(523,0.1,"triangle",0.11,null,0);
+            playTone(659,25,0.1,"triangle",0.11,null,0.08);
+            playTone(784,0.18,"triangle",0.12,null,0.16);
+        },
+        tent(){
+            playNoise(0.28,500,0.05);
+            playTone(260,0.22,"sine",0.09,340,0.04);
+        },
+        blizzardHit(){
+            playNoise(0.45,420,0.14);
+            playTone(220,0.35,"sawtooth",0.09,110);
+        },
+        blizzardSheltered(){
+            playNoise(0.32,320,0.07);
+        },
+        summit(){
+            const notes = [523,659,784,1046.5];
+            notes.forEach((n,idx)=>{
+                playTone(n, 0.22,"triangle",0.12,null,idx*0.11);
+            });
+        },
+        gameOver(){
+            playTone(240,0.22,"sawtooth",0.1,180,0);
+            playTone(175,0.35,"sawtooth",0.1,95,0.18);
+        }
+    };
+})();
 function initGame(peakIndex = currentPeakIndex){
     currentPeakIndex = peakIndex;
     const peak = PEAKS[currentPeakIndex];
@@ -108,6 +217,7 @@ function attemptMove(targetX, targetY){
     const tile = state.grid[targetY][targetX];
     if (tile === 3){
         addLog("Sheer cliff face. Impassable.");
+        SoundFX.blocked();
         return;
     }
     let rationCost = 1;
@@ -132,15 +242,20 @@ function attemptMove(targetX, targetY){
     state.oxygen -=1;
     state.turn +=1;
     if (tile === 4){
+        SoundFX.cache();
         state.rations += 4;
         state.oxygen +=3;
         state.pitons +=1;
         state.grid[targetY][targetX] = 0;
         addLog("Supply cache recovered! (+4 Rations, +3 O2, +1 Piton)");
     } else if (tile === 2){
+        SoundFX.icePiton();
         addLog("Anchored piton and scaled ice wall.");
     } else if (tile === 1){
+        SoundFX.stepRidge();
         addLog("Traversed steep ridge (-2 Rations).");
+    } else{
+        SoundFX.stepSnow();
     }
     if (state.grid[targetY][targetX] !== 9){
         advanceBlizzards(false);
@@ -151,6 +266,7 @@ function attemptMove(targetX, targetY){
 function pitchTent(){
     if (state.gameOver) return;
     if (state.rations <= 1){
+        SoundFX.blocked();
         addLog("Not enough rations to make camp.");
         return;
     }
@@ -158,6 +274,7 @@ function pitchTent(){
     state.oxygen +=2;
     state.turn +=1;
     addLog("Pitched tent. Recovered +2 Oxygen (-1 Ration)");
+    SoundFX.tent();
     advanceBlizzards(true);
     checkEndConditions();
     render();
@@ -165,6 +282,7 @@ function pitchTent(){
 function checkEndConditions(){
     const currentTile = state.grid[state.player.y][state.player.x];
     if (currentTile === 9){
+        SoundFX.summit();
         state.gameOver = true;
         const peak = PEAKS[currentPeakIndex];
         const hasNextPeak = currentPeakIndex<PEAKS.length-1;
@@ -178,11 +296,13 @@ function checkEndConditions(){
         return;
     }
     if (state.oxygen <=0){
+        SoundFX.gameOver();
         state.gameOver = true;
         showModal("HYPOXIA CRITICAL", "Your oxygen reserves ran dry before reaching the peak.");
         return;
     }
     if (state.rations <= 0){
+        SoundFX.gameOver();
         state.gameOver = true;
         showModal("EXHAUSTION", "You ran out of rations and could no longer continue the ascent.");
     }
@@ -278,6 +398,13 @@ if (nextPeakBtn){
         initGame(nextIndex);
     });
 }
+const muteBtn = document.getElementById("btn-mute");
+if (muteBtn){
+    muteBtn.addEventListener("click",()=>{
+        const isMuted = SoundFX.toggleMute();
+        muteBtn.textContent = isMuted ? "AUDIO: OFF" : "AUDIO: ON";
+    });
+}
 document.getElementById("btn-tent").addEventListener("click",pitchTent);
 document.getElementById("btn-restart").addEventListener("click", ()=>initGame(currentPeakIndex));
 document.getElementById("btn-modal-restart").addEventListener("click",()=> initGame(currentPeakIndex));
@@ -289,8 +416,10 @@ function advanceBlizzards(isSheltered){
     const inStorm = state.blizzardRows.includes(state.player.y);
     if (inStorm){
         if(isSheltered){
+            SoundFX.blizzardSheltered();
             addLog("Blizzard roared overhead, but your tent held firm!(0 Storm Damage)");
         } else {
+            SoundFX.blizzardHit();
             state.oxygen -=1;
             addLog("CAUGHT IN WHITEOUT! Freezing winds drained -1 Oxygen");
         }
