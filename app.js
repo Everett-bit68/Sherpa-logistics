@@ -71,6 +71,9 @@ function initGame(peakIndex = currentPeakIndex){
     if (subtitleEl){
         subtitleEl.textContent = `${peak.id}: ${peak.name}`;
     }
+    if (peakSelectEl){
+        peakSelectEl.value = String(currentPeakIndex);
+    }
     if (nextPeakBtn){
         nextPeakBtn.classList.add("hidden");
     }
@@ -245,7 +248,7 @@ function render(){
 }
 document.addEventListener("keydown",(e)=>{
     if (e.key === "r" || e.key === "R"){
-        initGame();
+        initGame(currentPeakIndex);
         return;
     }
     const {x,y} = state.player;
@@ -267,8 +270,8 @@ if (nextPeakBtn){
     });
 }
 document.getElementById("btn-tent").addEventListener("click",pitchTent);
-document.getElementById("btn-restart").addEventListener("click", initGame);
-document.getElementById("btn-modal-restart").addEventListener("click", initGame);
+document.getElementById("btn-restart").addEventListener("click", ()=>initGame(currentPeakIndex));
+document.getElementById("btn-modal-restart").addEventListener("click",()=> initGame(currentPeakIndex));
 function getNextRow(row){
     return row >= state.rows - 2?1:row+1;
 }
