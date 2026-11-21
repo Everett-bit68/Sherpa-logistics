@@ -6,6 +6,7 @@ const PEAKS = [
         summitElevation: 8848,
         startPos: {x : 3, y : 8},
         rations: 12,
+        oxygen: 10,
         pitons: 3,
         blizzardRows: [2,6],
         map: [
@@ -37,8 +38,6 @@ const PEAKS = [
     }
 ];
 let currentPeakIndex = 0;
-const ROWS = PEAK_01_MAP.length;
-const COLS = PEAK_01_MAP[0].length;
 let state = {};
 const gridEl = document.getElementById("mountain-grid");
 const turnEl = document.getElementById("turn-display");
@@ -53,6 +52,7 @@ const modalMessage = document.getElementById("modal-message");
 const weatherEl = document.getElementById("weather-display");
 const subtitleEl =document.querySelector(".brand .subtitle");
 const nextPeakBtn = document.getElementById("btn-next-peak");
+const peakSelectEl = document.getElementById("peak-select");
 function initGame(peakIndex = currentPeakIndex){
     currentPeakIndex = peakIndex;
     const peak = PEAKS[currentPeakIndex];
