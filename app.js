@@ -230,6 +230,7 @@ function attemptMove(targetX, targetY){
     const tile = state.grid[targetY][targetX];
     if (tile === 3){
         addLog("Sheer cliff face. Impassable.");
+        triggerBlockedFeedback();
         SoundFX.blocked();
         return;
     }
@@ -247,6 +248,7 @@ function attemptMove(targetX, targetY){
     }
     if (state.pitons < pitonCost){
         addLog("Need a climbing piton to scale that ice wall!");
+        triggerBlockedFeedback();
         SoundFX.blocked();
         return;
     }
@@ -287,6 +289,7 @@ function attemptMove(targetX, targetY){
 function pitchTent(){
     if (state.gameOver) return;
     if (state.rations <= 1){
+        triggerBlockedFeedback();
         SoundFX.blocked();
         addLog("Not enough rations to make camp.");
         return;
@@ -461,5 +464,12 @@ function advanceBlizzards(isSheltered){
             addLog("CAUGHT IN WHITEOUT! Freezing winds drained -1 Oxygen");
         }
     }
+}
+function triggerBlockedFeedback(){
+    SoundFX.blocked();
+    if (!gridEl) return;
+    gridEl.classList.remove("grid-shake");
+    void gridEl.offsetWidth;
+    gridEl.classList.add("grid-shake");
 }
 initGame();

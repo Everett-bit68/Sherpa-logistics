@@ -175,3 +175,23 @@ select.btn-secondary:hover,select.btn-secondary:focus{
 .stat-critical{
     color: var(--accent-red); text-shadow: 0 0 8px rgba(239,68,68,0.45);
 }
+@keyframes gridShake{
+    0%, 100%{
+        transform: translateX(0);
+    }
+    20%{
+        transform: translateX(-6px);
+    }
+    40%{
+        transform: translateX(6px);
+    }
+    60%{
+        transform: translateX(-4px);
+    }
+    80%{
+        transform: translateX(4px);
+    }
+}
+.mountain-grid.grid-shake{
+    animation: grid-shake 0.22s ease; border-radius: 4px;
+}
