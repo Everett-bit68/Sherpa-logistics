@@ -68,6 +68,7 @@ const weatherEl = document.getElementById("weather-display");
 const subtitleEl =document.querySelector(".brand .subtitle");
 const nextPeakBtn = document.getElementById("btn-next-peak");
 const peakSelectEl = document.getElementById("peak-select");
+const MAX_LOG_ENTRIES = 30;
 const SoundFX = (()=>{
     let ctx = null;
     let muted = false;
@@ -213,6 +214,9 @@ function addLog(msg){
     const entry = document.createElement("div");
     entry.textContent = `[T${String(state.turn).padStart(2, "0")}] ${msg}`;
     logEl.prepend(entry);
+    while (logEl.children.length > MAX_LOG_ENTRIES){
+        logEl.lastElementChild.remove();
+    }
 }
 function isAdjacent(x,y){
     const dx = Math.abs(x -state.player.x);
