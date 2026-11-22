@@ -46,7 +46,7 @@ const PEAKS = [
             [3, 1, 3, 2, 3, 1, 3],
             [0, 0, 4, 0, 1, 0, 0],
             [0, 2, 3, 0, 3, 2, 0],
-            [4, 1, 0, 2, 0, 1, 4],
+            [4, 0, 0, 2, 0, 1, 4],
             [3, 0, 1, 0, 1, 0, 3],
             [3, 3, 0, 0, 0, 3, 3]
         ]
@@ -57,23 +57,23 @@ const PEAKS = [
         baseElevation: 6200,
         summitElevation: 8849,
         startPos: { x: 3, y: 9},
-        rations: 10,
-        maxRations: 11,
-        oxygen: 8,
-        maxOxygen: 9,
+        rations: 12,
+        maxRations: 14,
+        oxygen: 12,
+        maxOxygen: 14,
         pitons: 2,
         maxPitons: 2,
         blizzardRows: [1, 4, 7],
         map: [
             [3, 3, 3, 9, 3, 3, 3],
-            [3, 2, 1, 2, 1, 2, 3],
-            [4, 0, 3, 1, 3, 0, 4],
-            [0, 2, 1, 0, 1, 2, 0],
-            [3, 1, 3, 2, 3, 1, 3],
-            [4, 0, 1, 0, 1, 0, 0],
+            [3, 2, 0, 2, 0, 2, 3],
+            [4, 0, 3, 1, 3, 0, 1],
+            [0, 2, 1, 0, 4, 2, 0],
+            [3, 0, 3, 1, 3, 0, 3],
+            [4, 0, 1, 0, 1, 0, 1],
             [0, 2, 3, 1, 3, 2, 0],
-            [1, 1, 0, 2, 0, 1, 4],
-            [3, 0, 1, 0, 1, 0, 3],
+            [1, 1, 0, 2, 0, 0, 4],
+            [3, 0, 1, 0, 1, 1, 3],
             [3, 3, 0, 0, 0, 3, 3]
         ]
     }
@@ -472,10 +472,11 @@ document.getElementById("btn-tent").addEventListener("click",pitchTent);
 document.getElementById("btn-restart").addEventListener("click", ()=>initGame(currentPeakIndex));
 document.getElementById("btn-modal-restart").addEventListener("click",()=> initGame(currentPeakIndex));
 function getNextRow(row){
-    return row >= state.rows - 2?1:row+1;
+    return row >= state.rows - 1 ? 1:row+1;
 }
 function advanceBlizzards(isSheltered){
-    state.blizzardRows = state.blizzardRows.map(getNextRow);
+    const nextRows = [...new Set(state.blizzardRows.map(getNextRow))];
+    state.blizzardRows = nextRows;
     const inStorm = state.blizzardRows.includes(state.player.y);
     if (inStorm){
         if(isSheltered){
