@@ -339,7 +339,7 @@ function render(){
     rationsEl.classList.toggle("stat-critical",state.rations <=2);
     rationsEl.classList.toggle("stat-warn",state.rations > 2 && state.rations <=4);
     oxygenEl.classList.toggle("stat-critical",state.oxygen<=2);
-    oxygenEl.classList.toggle("stat-warn", state.rations > 2 && state.rations <=4);
+    oxygenEl.classList.toggle("stat-warn", state.oxygen > 2 && state.oxygen <=4);
     pitonsEl.classList.toggle("stat-critical",state.pitons === 0);
     pitonsEl.classList.toggle("stat-warn",state.pitons === 1);
     const peak = PEAKS[currentPeakIndex];
