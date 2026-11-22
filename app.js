@@ -336,6 +336,12 @@ function render(){
     rationsEl.textContent = `${state.rations} / ${state.maxRations}`;
     oxygenEl.textContent = `${state.oxygen} / ${state.maxOxygen}`;
     pitonsEl.textContent = `${state.pitons} / ${state.maxPitons}`;
+    rationsEl.classList.toggle("stat-critical",state.rations <=2);
+    rationsEl.classList.toggle("stat-warn",state.rations > 2 && state.rations <=4);
+    oxygenEl.classList.toggle("stat-critical",state.oxygen<=2);
+    oxygenEl.classList.toggle("stat-warn", state.rations > 2 && state.rations <=4);
+    pitonsEl.classList.toggle("stat-critical",state.pitons === 0);
+    pitonsEl.classList.toggle("stat-warn",state.pitons === 1);
     const peak = PEAKS[currentPeakIndex];
     const progress = (state.rows - 1-state.player.y)/(state.rows-1);
     const elevation =Math.round(peak.baseElevation+progress*(peak.summitElevation-peak.baseElevation));
