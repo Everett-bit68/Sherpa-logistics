@@ -95,6 +95,8 @@ const subtitleEl =document.querySelector(".brand .subtitle");
 const nextPeakBtn = document.getElementById("btn-next-peak");
 const peakSelectEl = document.getElementById("peak-select");
 const MAX_LOG_ENTRIES = 30;
+const BEST_TURNS_STORAGE_KEY = "sherpa_logistics_best_turns_v1";
+const bestTurnEl = document.getElementById("stat-best-turns");
 const SoundFX = (()=>{
     let ctx = null;
     let muted = false;
@@ -334,13 +336,18 @@ function checkEndConditions(){
         SoundFX.summit();
         state.gameOver = true;
         const peak = PEAKS[currentPeakIndex];
+        const turnsTaken = state.turn - 1;
+        const { bestTurns, isNewRecord } = saveBestTurns(peak.id, turnsTaken);
         const hasNextPeak = currentPeakIndex<PEAKS.length-1;
         if (nextPeakBtn){
             nextPeakBtn.classList.toggle("hidden",!hasNextPeak);
         }
+        const recordNote = isNewRecord
+            ? `NEW BEST! (${bestTurns} turns)`
+            : ` Best: ${bestTurns} turns.`;
         showModal(
             "SUMMIT REACHED!",
-            `You conquered ${peak.name} in ${state.turn - 1} turns with ${state.rations} rations and ${state.oxygen} oxygen remaining.`
+            `You conquered ${peak.name} in ${turnsTaken} turns with ${state.rations} rations and ${state.oxygen} oxygen remaining.${recordNote}`
         );
         return;
     }
@@ -376,6 +383,10 @@ function render(){
     const progress = (state.rows - 1-state.player.y)/(state.rows-1);
     const elevation =Math.round(peak.baseElevation+progress*(peak.summitElevation-peak.baseElevation));
     elevationEl.textContent = `${elevation.toLocaleString()}m`;
+    if (bestTurnEl){
+        const best = getBestTurn(peak.id);
+        bestTurnEl.textContent = best !== null ? `${best} TURNS` : "--";
+    }
     const forecastRows = state.blizzardRows.map(getNextRow);
     const playerInStorm = state.blizzardRows.includes(state.player.y);
     const playerInForecast = forecastRows.includes(state.player.y);
@@ -495,5 +506,31 @@ function triggerBlockedFeedback(){
     gridEl.classList.remove("grid-shake");
     void gridEl.offsetWidth;
     gridEl.classList.add("grid-shake");
+}
+function loadBestTurns(){
+    try{
+        const raw = localStorage.getItem(BEST_TURNS_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === "object" ? parsed : {};
+    } catch{
+        return {};
+    }
+}
+function saveBestTurns(peakId, turnsTaken){
+    const records = loadBestTurns();
+    const prevBest = records[peakId];
+    const isNewRecord = typeof prevBest !== "number" || turnsTaken < prevBest;
+    const bestTurns = isNewRecord ? turnsTaken : prevBest;
+    records[peakId] = bestTurns;
+    try{
+        localStorage.setItem(BEST_TURNS_STORAGE_KEY, JSON.stringify(records));
+    } catch{
+        
+    }
+    return {bestTurns, isNewRecord};
+}
+function getBestTurn(peakId){
+    const records = loadBestTurns();
+    return typeof records[peakId] === "number" ? records[peakId] : null;
 }
 initGame();
