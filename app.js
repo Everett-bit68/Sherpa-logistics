@@ -50,6 +50,32 @@ const PEAKS = [
             [3, 0, 1, 0, 1, 0, 3],
             [3, 3, 0, 0, 0, 3, 3]
         ]
+    },
+    {
+        id: "PEAK 03",
+        name: "DEATH ZONE",
+        baseElevation: 6200,
+        summitElevation: 8849,
+        startPos: { x: 3, y: 9},
+        rations: 10,
+        maxRations: 11,
+        oxygen: 8,
+        maxOxygen: 9,
+        pitons: 2,
+        maxPitons: 2,
+        blizzardRows: [1, 4, 7],
+        map: [
+            [3, 3, 3, 9, 3, 3, 3],
+            [3, 2, 1, 2, 1, 2, 3],
+            [4, 0, 3, 1, 3, 0, 4],
+            [0, 2, 1, 0, 1, 2, 0],
+            [3, 1, 3, 2, 3, 1, 3],
+            [4, 0, 1, 0, 1, 0, 0],
+            [0, 2, 3, 1, 3, 2, 0],
+            [1, 1, 0, 2, 0, 1, 4],
+            [3, 0, 1, 0, 1, 0, 3],
+            [3, 3, 0, 0, 0, 3, 3]
+        ]
     }
 ];
 let currentPeakIndex = 0;
