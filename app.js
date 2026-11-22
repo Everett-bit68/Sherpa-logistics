@@ -287,14 +287,9 @@ function pitchTent(){
         addLog("Not enough rations to make camp.");
         return;
     }
-    if (state.oxygen >= state.maxOxygen){
-        SoundFX.blocked();
-        addLog("Oxygen reserves already at max capacity");
-        return;
-    }
     const prevOxygen = state.oxygen;
     state.rations -=1;
-    state.oxygen = Math.min(state.maxOxygen,state.oxygen+2);
+    state.oxygen = Math.min(state.maxOxygen, state.oxygen+2);
     state.turn +=1;
     const gainedOxygen = state.oxygen - prevOxygen;
     addLog(`Pitched tent. Recovered +${gainedOxygen} Oxygen (-1 Ration)`);
