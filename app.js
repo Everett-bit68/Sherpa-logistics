@@ -231,7 +231,6 @@ function attemptMove(targetX, targetY){
     if (tile === 3){
         addLog("Sheer cliff face. Impassable.");
         triggerBlockedFeedback();
-        SoundFX.blocked();
         return;
     }
     let rationCost = 1;
@@ -243,13 +242,12 @@ function attemptMove(targetX, targetY){
     }
     if (state.rations < rationCost){
         addLog("Insufficient rations for that climb!");
-        SoundFX.blocked();
+        triggerBlockedFeedback();
         return;
     }
     if (state.pitons < pitonCost){
         addLog("Need a climbing piton to scale that ice wall!");
         triggerBlockedFeedback();
-        SoundFX.blocked();
         return;
     }
     state.player.x = targetX;
@@ -290,7 +288,6 @@ function pitchTent(){
     if (state.gameOver) return;
     if (state.rations <= 1){
         triggerBlockedFeedback();
-        SoundFX.blocked();
         addLog("Not enough rations to make camp.");
         return;
     }

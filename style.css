@@ -193,5 +193,5 @@ select.btn-secondary:hover,select.btn-secondary:focus{
     }
 }
 .mountain-grid.grid-shake{
-    animation: grid-shake 0.22s ease; border-radius: 4px;
+    animation: gridShake 0.22s ease; border-radius: 4px;
 }
