@@ -395,10 +395,18 @@ function render(){
     }
 }
 document.addEventListener("keydown",(e)=>{
+    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)){
+        e.preventDefault();
+    }
     if (e.key === "r" || e.key === "R"){
         initGame(currentPeakIndex);
         return;
     }
+    if (e.key === "t" || e.key === "T" || e.key === " "){
+        pitchTent();
+        return;
+    }
+    if (!state.player) return;
     const {x,y} = state.player;
     if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") attemptMove(x,y -1);
     if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") attemptMove(x,y + 1);
