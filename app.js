@@ -97,6 +97,9 @@ const peakSelectEl = document.getElementById("peak-select");
 const MAX_LOG_ENTRIES = 30;
 const BEST_TURNS_STORAGE_KEY = "sherpa_logistics_best_turns_v1";
 const bestTurnEl = document.getElementById("stat-best-turns");
+const tentbtn = document.getElementById("btn-tent");
+let keyPulseTimer = null;
+let tentPulseTimer = null;
 const SoundFX = (()=>{
     let ctx = null;
     let muted = false;
@@ -451,14 +454,20 @@ document.addEventListener("keydown",(e)=>{
     }
     if (e.key === "t" || e.key === "T" || e.key === " "){
         pitchTent();
+        pulseTentFeedback();
         return;
     }
     if (!state.player) return;
     const {x,y} = state.player;
-    if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") attemptMove(x,y -1);
-    if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") attemptMove(x,y + 1);
-    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") attemptMove(x - 1,y);
-    if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") attemptMove(x + 1,y);
+    let targetX = x;
+    let targetY = y;
+    if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") targetY = y -1;
+    else if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") targetY = y+1;
+    else if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") targetX = x-1;
+    else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") targetX = x+1;
+    else return;
+    attemptMove(targetX,targetY);
+    pulseTileFeedback(targetX,targetY);
 });
 if (peakSelectEl){
     peakSelectEl.addEventListener("change",(e)=>{
@@ -532,5 +541,28 @@ function saveBestTurns(peakId, turnsTaken){
 function getBestTurn(peakId){
     const records = loadBestTurns();
     return typeof records[peakId] === "number" ? records[peakId] : null;
+}
+function pulseTileFeedback(x, y){
+    if (!gridEl || !state.cols) return;
+    const index = y * state.cols + x;
+    const cell = gridEl.children[index];
+    if (!cell) return;
+    cell.classList.remove("key-target");
+    void cell.offsetWidth;
+    cell.classList.remove("key-target");
+    clearTimeout(keyPulseTimer);
+    keyPulseTimer = setTimeout(()=>{
+        cell.classList.remove("key-target");
+    }, 160);
+}
+function pulseTentFeedback(){
+    if (!tentbtn)return;
+    tentbtn.classList.remove("key-active");
+    void tentbtn.offsetWidth;
+    tentbtn.classList.add("key-active");
+    clearTimeout(tentPulseTimer);
+    tentPulseTimer = setTimeout(()=>{
+        tentbtn.classList.remove("key-active");
+    }, 160);
 }
 initGame();
