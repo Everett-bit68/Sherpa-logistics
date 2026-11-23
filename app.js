@@ -97,6 +97,7 @@ const peakSelectEl = document.getElementById("peak-select");
 const MAX_LOG_ENTRIES = 30;
 const BEST_TURNS_STORAGE_KEY = "sherpa_logistics_best_turns_v1";
 const bestTurnEl = document.getElementById("stat-best-turns");
+const previewEl = document.getElementById("tile-preview");
 const tentbtn = document.getElementById("btn-tent");
 let keyPulseTimer = null;
 let tentPulseTimer = null;
@@ -238,7 +239,8 @@ function initGame(peakIndex = currentPeakIndex){
     }
     logEl.innerHTML = "";
     modalOverlay.classList.add("hidden");
-    addLog(`${peak.id} (${peak.name}) basecamp departed. Plan your route.`);    
+    addLog(`${peak.id} (${peak.name}) basecamp departed. Plan your route.`);   
+    updateTilePreview(null,null); 
     render();
 }
 function addLog(msg){
@@ -440,6 +442,8 @@ function render(){
                 cell.innerHTML = `<div class="player-marker">P</div>`;
             }
             cell.addEventListener("click",()=> attemptMove(x,y));
+            cell.addEventListener("mouseenter",()=>updateTilePreview(x,y));
+            cell.addEventListener("mouseleave",()=>updateTilePreview(null,null));
             gridEl.appendChild(cell);
         }
     }
@@ -564,5 +568,64 @@ function pulseTentFeedback(){
     tentPulseTimer = setTimeout(()=>{
         tentbtn.classList.remove("key-active");
     }, 160);
+}
+function getTileCostSummary(x,y){
+    if (!state.grid || state.gameOver) return null;
+    if (x<0||x>=state.cols||y<0||y>=state.rows) return null;
+    const tile = state.grid[y][x];
+    const adjacent = isAdjacent(x,y);
+    if (tile === 3){
+        return {text: "SHEER CLIFF(X}: Impassable.", status: "blocked-move"};
+    }
+    let rationCost = 1;
+    let pitonCost = 0;
+    let label = "SNOW(.)";
+    if (tile === 1){
+        rationCost = 2;
+        label = "STEEP RIDGE (^)";
+    } else if (tile === 2){
+        rationCost = 1;
+        pitonCost = 1;
+        label = "ICE WALL (#)";
+    } else if (tile === 4){
+        label = "SUPPLY CACHE (+)";
+    } else if (tile === 9){
+        label = "SUMMIT (PEAK)";
+    }
+    const forecastRows = state.blizzardRows.map(getNextRow);
+    const inStorm = state.blizzardRows.includes(y);
+    const inForecast = forecastRows.includes(y);
+    const weatherTag = inStorm ? " | WHITEOUT (-1 O2)" : inForecast? " | STORM NEXT" : "";
+    const costParts = [`-${rationCost} RAT`, "-1 O2"];
+    if (pitonCost > 0) costParts.push(`-${pitonCost} PITON`);
+    if (adjacent){
+        return{
+            text: `${label}: ${costParts.join(", ")}${weatherTag} (Not Adjacent)`,
+            status: ""
+        };
+    }
+    const enoughRations = state.rations >= rationCost;
+    const enoughPitons = state.pitons >= pitonCost;
+    if (!enoughPitons){
+        return{
+            text: `${label}: Need ${pitonCost} Piton (have ${state.pitons})${weatherTag}`,
+            status: "blocked-move"
+        };
+    }
+    return{
+        text: `${label}: ${costParts.join(", ")}${weatherTag}`,
+        status: "can-move"
+    };
+}
+function updateTilePreview(x,y){
+    if (!previewEl) return;
+    const info = getTileCostSummary(x,y);
+    previewEl.classList.remove("can-move","blocked-move");
+    if (!info){
+        previewEl.textContent = "Hover an adjacent tile to preview more cost.";
+        return;
+    }
+    previewEl.textContent = info.text;
+    if (info.status) previewEl.classList.add(info.status);
 }
 initGame();
