@@ -392,6 +392,9 @@ function render(){
         const best = getBestTurn(peak.id);
         bestTurnEl.textContent = best !== null ? `${best} TURNS` : "--";
     }
+    if (tentbtn){
+        tentbtn.disabled = state.gameOver || state.rations <=1;
+    }
     const forecastRows = state.blizzardRows.map(getNextRow);
     const playerInStorm = state.blizzardRows.includes(state.player.y);
     const playerInForecast = forecastRows.includes(state.player.y);
@@ -575,11 +578,11 @@ function getTileCostSummary(x,y){
     const tile = state.grid[y][x];
     const adjacent = isAdjacent(x,y);
     if (tile === 3){
-        return {text: "SHEER CLIFF(X}: Impassable.", status: "blocked-move"};
+        return {text: "SHEER CLIFF (X): Impassable.", status: "blocked-move"};
     }
     let rationCost = 1;
     let pitonCost = 0;
-    let label = "SNOW(.)";
+    let label = "SNOW (.)";
     if (tile === 1){
         rationCost = 2;
         label = "STEEP RIDGE (^)";
@@ -598,7 +601,7 @@ function getTileCostSummary(x,y){
     const weatherTag = inStorm ? " | WHITEOUT (-1 O2)" : inForecast? " | STORM NEXT" : "";
     const costParts = [`-${rationCost} RAT`, "-1 O2"];
     if (pitonCost > 0) costParts.push(`-${pitonCost} PITON`);
-    if (adjacent){
+    if (!adjacent){
         return{
             text: `${label}: ${costParts.join(", ")}${weatherTag} (Not Adjacent)`,
             status: ""
@@ -606,6 +609,12 @@ function getTileCostSummary(x,y){
     }
     const enoughRations = state.rations >= rationCost;
     const enoughPitons = state.pitons >= pitonCost;
+    if (!enoughRations){
+        return{
+            text: `${label}: Need ${rationCost} Rations (have ${state.rations})${weatherTag}`,
+            status: "blocked-move"
+        };
+    }
     if (!enoughPitons){
         return{
             text: `${label}: Need ${pitonCost} Piton (have ${state.pitons})${weatherTag}`,
@@ -622,7 +631,7 @@ function updateTilePreview(x,y){
     const info = getTileCostSummary(x,y);
     previewEl.classList.remove("can-move","blocked-move");
     if (!info){
-        previewEl.textContent = "Hover an adjacent tile to preview more cost.";
+        previewEl.textContent = "Hover an adjacent tile to preview move cost.";
         return;
     }
     previewEl.textContent = info.text;

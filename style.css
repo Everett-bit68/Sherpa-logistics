@@ -199,11 +199,14 @@ select.btn-secondary:hover,select.btn-secondary:focus{
 }
 .tile-preview{
     font-size: 0.78rem; color: var(--text-muted); margin-top: 0.55rem; padding-top: 0.55rem;
-    border-top: 1px solid var(--border-color); min-height: 2.2em; line-height: 1.35;
+    border-top: 1px solid var(--border-color); min-height: 2.3em; line-height: 1.35;
 }
 .tile-preview.can-move{
     color: var(--accent-cyan);
 }
 .tile-preview.blocked-move{
     color: var(--accent-amber);
+}
+.btn-primary:disabled{
+    opacity: 0.45; cursor: not-allowed; box-shadow: none; transform: none;
 }
