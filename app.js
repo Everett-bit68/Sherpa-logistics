@@ -574,8 +574,9 @@ function pulseTentFeedback(){
 }
 function getTileCostSummary(x,y){
     if (!state.grid || state.gameOver) return null;
-    if (x<0||x>=state.cols||y<0||y>=state.rows) return null;
-    const tile = state.grid[y][x];
+    if (x < 0|| x >= state.cols || y < 0 || y >= state.rows) return null;
+    const tile = state.grid[y]?.[x];
+    if (tile === undefined) return null;
     const adjacent = isAdjacent(x,y);
     if (tile === 3){
         return {text: "SHEER CLIFF (X): Impassable.", status: "blocked-move"};
