@@ -549,7 +549,7 @@ function pulseTileFeedback(x, y){
     if (!cell) return;
     cell.classList.remove("key-target");
     void cell.offsetWidth;
-    cell.classList.remove("key-target");
+    cell.classList.add("key-target");
     clearTimeout(keyPulseTimer);
     keyPulseTimer = setTimeout(()=>{
         cell.classList.remove("key-target");
