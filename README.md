@@ -7,8 +7,9 @@ A turn-based survival game set in the alps coded in HTML, CSS and JavaScript. Ra
 
 - PEAK 02: SERAC WALL
 
--PEAK 03: DEATH ZONE
+- PEAK 03: DEATH ZONE
 
+![Sherpa-logistics gameplay screenshot](gameplay.png)
 
 ## Game
 - It costs 1 oxygen per move.
